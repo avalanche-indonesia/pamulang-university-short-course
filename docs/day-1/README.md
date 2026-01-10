@@ -1,5 +1,13 @@
 # 📘 Day 1 – Blockchain Fundamentals & Avalanche Fundamentals
 
+---
+
+## Pre-Test
+
+[Link](https://forms.gle/eQzbrmRQG7whqBRh8)
+
+---
+
 > Avalanche Indonesia Short Course – **Day 1**
 
 Hari pertama difokuskan pada **Fundamental Layer**: bagaimana cara kerja blockahain Avalanche dan struktur dasar dari dApp.
@@ -273,6 +281,7 @@ Tampilkan di UI:
 - Wallet address
 - Network name
 - Connection status
+- Tambahkan nama lengkap dan NIM kalian sebagai peserta setelah wallet address (WAJIB)
 
 ---
 
@@ -296,6 +305,8 @@ Tampilkan di UI:
 - [ ] Frontend berjalan
 - [ ] Wallet bisa connect
 - [ ] Network terdeteksi dengan benar
+
+[Submission Link](https://forms.gle/bs6UtUejoe3Yupv9A) aktif selama 48 jam
 
 ---
 
@@ -326,6 +337,12 @@ Di Day 2, kita akan:
 
 - Avalanche Academy:
   [https://build.avax.network/academy](https://build.avax.network/academy)
+
+---
+
+## Post-Test
+
+[Link](https://forms.gle/x2bzfVa7wjNj2j4s6)
 
 ---
 

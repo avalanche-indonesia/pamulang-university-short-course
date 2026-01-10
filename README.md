@@ -90,10 +90,53 @@ avalanche-fullstack-dapp/
 | Day 1 | Blockchain & Avalanche     | Wallet connect ke dApp                    |
 | Day 2 | Smart Contract             | Contract deploy ke Avalanche Fuji Testnet |
 | Day 3 | Frontend dApp with Next.js | Interaksi smart contract                  |
-| Day 4 | Backend API with Nest.js   | Simpan data off-chain                     |
+| Day 4 | Backend API with NestJS    | Simpan data off-chain                     |
 | Day 5 | Integration & Deploy       | Full stack dApp live                      |
 
 📘 Modul lengkap tersedia di folder [`/docs`](./docs)
+
+---
+
+## 🕒 Jadwal Pelaksanaan
+
+Short course ini dilaksanakan selama **5 hari** dengan jadwal sebagai berikut:
+
+- **Hari / Tanggal:**
+  **Senin, 12 Januari 2026 – Jumat, 16 Januari 2026**
+- **Waktu:**
+  **13.00 – 16.00 WIB**
+- **Tempat:**
+  Pamulang University (Remote)
+
+---
+
+## 🧪 Format Kegiatan Harian
+
+Setiap hari, sesi pembelajaran dibagi ke dalam beberapa bagian berikut:
+
+- **Pretest**
+  Untuk mengukur pemahaman awal peserta
+- **Materi (1 jam)**
+  Penjelasan konsep utama sesuai modul harian
+- **Demo (1 jam)**
+  Live coding & demonstrasi implementasi
+- **Penjelasan Tugas (1 jam)**
+  Breakdown tugas harian & expected output
+- **Postest**
+  Untuk mengukur pemahaman setelah sesi
+
+---
+
+## 🎓 Kriteria Kelulusan & Sertifikat
+
+Peserta **berhak mendapatkan sertifikat kelulusan** apabila memenuhi seluruh kriteria berikut:
+
+- **Kehadiran pretest & postest minimal 70%**
+- **Nilai postest minimal 70%**
+- **Mengerjakan seluruh tugas harian (100%)**
+
+Sertifikat diberikan sebagai bukti penyelesaian
+**Avalanche Full Stack dApp Short Course**.
 
 ---
 
