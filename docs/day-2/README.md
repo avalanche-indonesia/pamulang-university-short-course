@@ -1,5 +1,13 @@
 # 📘 Day 2 – Smart Contract Fundamentals & Solidity (Avalanche)
 
+---
+
+## Pre-Test (10 menit)
+
+[Link](https://forms.gle/5Tou5pDtRyUbdfz76)
+
+---
+
 > Avalanche Indonesia Short Course – **Day 2**
 
 Hari kedua difokuskan pada **Smart Contract Layer**: bagaimana logic dan state dApp hidup di blockchain, bukan di backend server.
@@ -40,15 +48,17 @@ Smart contract pada Day 2 berfungsi sebagai:
 
 ## ⏱️ Struktur Sesi (± 3 Jam)
 
-| Sesi    | Durasi | Aktivitas                        |
-| ------- | ------ | -------------------------------- |
-| Theory  | 1 Jam  | Konsep smart contract & Solidity |
-| Demo    | 1 Jam  | Setup Hardhat & deploy contract  |
-| Praktik | 1 Jam  | Modifikasi & deploy mandiri      |
+| Sesi                | Durasi   | Aktivitas                        |
+| ------------------- | -------- | -------------------------------- |
+| Pre-test            | 10 menit |                                  |
+| Theory              | 50 menit | Konsep smart contract & Solidity |
+| Demo                | 1 Jam    | Setup Hardhat & deploy contract  |
+| Penjelasan Homework | 40 menit | Modifikasi & deploy mandiri      |
+| Post-test           | 20 menit |                                  |
 
 ---
 
-# 1️⃣ Theory
+# 1️⃣ Theory (50 menit)
 
 ## 1.1 Apa itu Smart Contract?
 
@@ -195,6 +205,11 @@ Kenapa Hardhat?
 - Populer di industri
 - Cocok untuk Avalanche (EVM)
 
+Alternatif selain hardhat:
+
+- Remix
+- Foundry
+
 ---
 
 ## 2️⃣ Demo (1 Jam)
@@ -202,8 +217,170 @@ Kenapa Hardhat?
 ## 2.1 Setup Project
 
 ```bash
-cd apps/contracts
-npm install
+npm init -y
+```
+
+```bash
+yarn add -D hardhat
+```
+
+Jika yarn belum terinstall bisa menggunakan:
+
+```bash
+corepack enable
+```
+
+```bash
+corepack prepare yarn@stable --activate
+```
+
+Selanjutnya membuat yarn berry seperti yarn classic dengan node_modules
+
+```bash
+touch .yarnrc.yml
+```
+
+```text
+nmHoistingLimits: workspaces
+nodeLinker: node-modules
+```
+
+```bash
+touch .gitignore
+```
+
+```text
+# Dependencies
+node_modules
+
+# Env files
+.env
+
+# Yarn
+.yarn/*
+!.yarn/releases
+!.yarn/patches
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+!.yarn/cache
+.pnp.*
+
+# Misc
+.DS_Store
+
+# IDE
+.vscode
+.idea
+```
+
+```bash
+yarn install
+```
+
+```bash
+yarn dlx hardhat --init
+```
+
+```bash
+touch .mocharc.json
+```
+
+```json
+{
+  "require": "hardhat/register",
+  "timeout": 40000,
+  "_": ["test*/**/*.ts"]
+}
+```
+
+```bash
+touch .env
+```
+
+```env
+MNEMONIC="here is where your extracted twelve words mnemonic phrase should be put"
+PRIVATE_KEY="<your wallet private key should go here>"
+POKT_API_KEY="********************************"
+INFURA_API_KEY="********************************"
+INFURA_API_SECRET="********************************"
+ALCHEMY_API_KEY="********************************"
+ETHERSCAN_API_KEY="********************************"
+```
+
+```bash
+yarn hardhat compile
+```
+
+```bash
+yarn hardhat test
+```
+
+Update `hardhat.config.ts`
+
+```ts
+import { task, type HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-toolbox-viem";
+
+import { ETHERSCAN_API, RPC_URL, USER_PRIVATE_KEY } from "./helpers/constants";
+
+const config: HardhatUserConfig = {
+  solidity: {
+    version: "0.8.27",
+    settings: {
+      evmVersion: "shanghai",
+      optimizer: {
+        enabled: true,
+        runs: 1000,
+      },
+    },
+  },
+  networks: {
+    avalancheFuji: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      chainId: 43113,
+      accounts: [USER_PRIVATE_KEY],
+    },
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: ETHERSCAN_API,
+  },
+  sourcify: {
+    // Disabled by default
+    // Doesn't need an API key
+    enabled: true,
+  },
+};
+
+task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+  const accounts = await hre.viem.getWalletClients();
+  for (const account of accounts) {
+    console.log(account.account.address);
+  }
+});
+
+export default config;
+```
+
+Create hardhat task
+
+```js
+import { task, type HardhatUserConfig } from "hardhat/config";
+
+...
+
+task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+  const accounts = await hre.viem.getWalletClients();
+  for (const account of accounts) {
+    console.log(account.account.address);
+  }
+});
+```
+
+```bash
+yarn hardhat accounts
 ```
 
 Struktur:
@@ -216,9 +393,15 @@ apps/contracts/
 ├── hardhat.config.ts
 ```
 
+VS Code extensions
+
+- [Mocha Test Explorer](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-mocha-test-adapter)
+
+- [Hardhat](https://hardhat.org/hardhat-vscode/docs/overview)
+
 ---
 
-## 2.2 Smart Contract Pertama
+## 2.2 Smart Contract
 
 **`contracts/SimpleStorage.sol`**
 
@@ -354,15 +537,19 @@ modifier onlyOwner() {
 
 Gunakan pada `setValue`.
 
+Tambahkan 1 state lainnya seperti `message` atau `todo list` yang bisa diupdate seperti kita menyimpan value
+
 ---
 
 ## 🧪 Checklist
 
 - [ ] Contract berhasil compile
 - [ ] Contract berhasil deploy
-- [ ] Address tersimpan
+- [ ] Address tersimpan di blockchain Avalanche Fuji Testnet
 - [ ] ABI tersedia
 - [ ] Event terlihat di explorer
+
+[Submission Link](https://forms.gle/bDjmXjqaK3X7yapc8) aktif selama 48 jam
 
 ---
 
@@ -396,6 +583,18 @@ Day 3 fokus pada **Frontend Integration**:
 - Solidity Docs: [https://docs.soliditylang.org](https://docs.soliditylang.org)
 - Hardhat Docs: [https://hardhat.org](https://hardhat.org)
 - Avalanche Academy: [https://build.avax.network/academy](https://build.avax.network/academy)
+
+---
+
+## Post-Test
+
+[Link](https://forms.gle/JiDSq7gsFKm43AXr6)
+
+---
+
+## Feedback
+
+[Link](https://forms.gle/FskqGK5AZjwMMhTx9)
 
 ---
 
