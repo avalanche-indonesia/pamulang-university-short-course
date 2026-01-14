@@ -63,7 +63,7 @@ async function connectWallet() {
     if (chainId === AVALANCHE_FUJI_CHAIN_ID) {
       networkEl.textContent = "Avalanche Fuji Testnet";
       statusEl.textContent = "Connected ✅";
-      statusEl.style.color = "#4cd137";
+      statusEl.style.color = "#3ec829";
       connectBtn.textContent = "Disconnect";
       isConnected = true;
 
