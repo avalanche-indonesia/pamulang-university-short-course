@@ -13,12 +13,13 @@ function formatAvaxBalance(balanceWei) {
   console.log({ balance });
   return (balance / 1e18).toFixed(4);
 }
+//shorten address
 const shortenAddress = (address) => {
       if (!address) return "";
       return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
     };
 
-
+//connect and disconnect
 let isConnected = false;
 
 function disconnectWallet() {
