@@ -1,4 +1,4 @@
-# 🚀 Avalanche Full Stack dApp – Short Course at Pamulang University
+# 🚀 Avalanche Full Stack dApp – Short Course at Pamulang University Day1 Blockchain
 
 Short course ini dirancang untuk membantu peserta **membangun Full Stack dApp sederhana di jaringan Avalanche** dari nol hingga deployment, menggunakan **1 template project yang sama selama 5 hari**.
 
