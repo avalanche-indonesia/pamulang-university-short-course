@@ -8,6 +8,46 @@ const errorEl = document.getElementById("error-message");
 // Avalanche Fuji Testnet chainId (hex)
 const AVALANCHE_FUJI_CHAIN_ID = "0xa869";
 
+// Try to switch wallet to Avalanche Fuji; if missing, try to add it
+async function switchToAvalancheFuji() {
+  if (!window.ethereum) return false;
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: AVALANCHE_FUJI_CHAIN_ID }],
+    });
+    return true;
+  } catch (switchError) {
+    if (switchError && switchError.code === 4902) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: AVALANCHE_FUJI_CHAIN_ID,
+            chainName: 'Avalanche Fuji Testnet',
+            nativeCurrency: { name: 'AVAX', symbol: 'AVAX', decimals: 18 },
+            rpcUrls: ['https://api.avax-test.network/ext/bc/C/rpc'],
+            blockExplorerUrls: ['https://testnet.snowtrace.io/'],
+          }],
+        });
+        // try to switch again after adding
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: AVALANCHE_FUJI_CHAIN_ID }],
+        });
+        return true;
+      } catch (addError) {
+        console.error('Failed to add/switch network', addError);
+        if (errorEl) errorEl.textContent = 'Failed to add/switch to Avalanche Fuji Testnet.';
+        return false;
+      }
+    }
+    console.error('Failed to switch network', switchError);
+    if (errorEl) errorEl.textContent = 'Failed to switch network: ' + (switchError && switchError.message ? switchError.message : switchError);
+    return false;
+  }
+}
+
 function formatAvaxBalance(balanceWei) {
   const balance = parseInt(balanceWei, 16);
   console.log({ balance });
@@ -99,11 +139,27 @@ async function connectWallet() {
 
       balanceEl.textContent = formatAvaxBalance(balanceWei);
     } else {
-      networkEl.textContent = "Wrong Network ❌";
-      statusEl.textContent = "Please switch to Avalanche Fuji";
-      statusEl.style.color = "#fbc531";
-      balanceEl.textContent = "-";
-      if (errorEl) errorEl.textContent = "Wrong network. Please switch your wallet to Avalanche Fuji Testnet (chainId 0xa869).";
+      // Try to programmatically switch the user's wallet to Avalanche Fuji
+      const switched = await switchToAvalancheFuji();
+      if (switched) {
+        networkEl.textContent = "Avalanche Fuji Testnet";
+        statusEl.textContent = "Connected ✅";
+        statusEl.style.color = "#4cd137";
+        connectBtn.textContent = "Disconnect";
+        isConnected = true;
+
+        const balanceWei = await window.ethereum.request({
+          method: "eth_getBalance",
+          params: [address, "latest"],
+        });
+        balanceEl.textContent = formatAvaxBalance(balanceWei);
+      } else {
+        networkEl.textContent = "Wrong Network ❌";
+        statusEl.textContent = "Please switch to Avalanche Fuji";
+        statusEl.style.color = "#fbc531";
+        balanceEl.textContent = "-";
+        if (errorEl) errorEl.textContent = "Wrong network. Please switch your wallet to Avalanche Fuji Testnet (chainId 0xa869).";
+      }
     }
   } catch (error) {
     console.error(error);
