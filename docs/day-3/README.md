@@ -1,5 +1,13 @@
 # 📘 Day 3 – Frontend dApp dengan Next.js (Avalanche)
 
+---
+
+## Pre-Test (10 menit)
+
+[Link](https://forms.gle/Jjt5ZtVrjT5WNnfA6)
+
+---
+
 > Avalanche Indonesia Short Course – **Day 3**
 
 Hari ketiga difokuskan pada **Frontend Layer**: bagaimana **Next.js** berinteraksi dengan **wallet** dan **smart contract** yang sudah dideploy pada Day 2.
@@ -43,15 +51,17 @@ Smart contract tetap menjadi **single source of truth**.
 
 ## ⏱️ Struktur Sesi (± 3 Jam)
 
-| Sesi    | Durasi | Aktivitas                        |
-| ------- | ------ | -------------------------------- |
-| Theory  | 1 Jam  | Frontend Web3 & Wallet Framework |
-| Demo    | 1 Jam  | Next.js + Reown + Smart Contract |
-| Praktik | 1 Jam  | Read & Write Contract Mandiri    |
+| Sesi                | Durasi   | Aktivitas                        |
+| ------------------- | -------- | -------------------------------- |
+| Pre-test            | 10 menit |                                  |
+| Theory              | 50 menit | Frontend Web3 & Wallet Framework |
+| Demo                | 1 Jam    | Next.js + Reown + Smart Contract |
+| Penjelasan Homework | 40 menit | Read & Write Contract Mandiri    |
+| Post-test           | 20 menit |                                  |
 
 ---
 
-# 1️⃣ Theory
+# 1️⃣ Theory (50 menit)
 
 ## 1.1 Peran Frontend dalam dApp
 
@@ -214,7 +224,7 @@ Hal penting yang perlu diingat:
 
 ```bash
 cd apps/frontend
-npm install
+npx create-next-app@latest ./
 npm run dev
 ```
 
@@ -237,6 +247,62 @@ Langkah umum:
 
 📌 Detail teknis dijelaskan saat demo live.
 
+```bash
+
+npm install wagmi viem @tanstack/react-query
+npm install @walletconnect/ethereum-provider
+```
+
+create file provider.tsx
+
+```bash
+'use client';
+
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import { avalancheFuji } from 'wagmi/chains';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+const config = createConfig({
+  chains: [avalancheFuji],
+  transports: {
+    [avalancheFuji.id]: http(),
+  },
+});
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+}
+```
+
+edit layout.tsx
+
+```bash
+import './globals.css';
+import { Providers } from './providers';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
 ---
 
 ## 2.3 Connect Wallet (Core Wallet)
@@ -247,6 +313,52 @@ Demo mencakup:
 - Connect via Core Wallet
 - Ambil wallet address
 - Deteksi network (Fuji)
+
+edit page.tsx on app folder
+
+```bash
+'use client';
+
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { injected } from 'wagmi/connectors';
+
+export default function Home() {
+  const { address, isConnected } = useAccount();
+  const { connect, isPending } = useConnect();
+  const { disconnect } = useDisconnect();
+
+  return (
+    <main className="min-h-screen flex items-center justify-center">
+      <div className="p-6 border rounded space-y-4">
+        <h1 className="text-xl font-bold">Step 1: Connect Wallet</h1>
+
+        {!isConnected ? (
+          <button
+            onClick={() => connect({ connector: injected() })}
+            disabled={isPending}
+            className="px-4 py-2 bg-black text-white rounded"
+          >
+            {isPending ? 'Connecting...' : 'Connect Wallet'}
+          </button>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-sm">Connected address:</p>
+            <p className="font-mono text-xs break-all">{address}</p>
+
+            <button
+              onClick={() => disconnect()}
+              className="text-sm underline text-red-600"
+            >
+              Disconnect
+            </button>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
+
+```
 
 ---
 
@@ -337,6 +449,185 @@ Implementasikan:
 
 ---
 
+update final page.tsx
+
+```bash
+'use client';
+
+import { useState } from 'react';
+import {
+  useAccount,
+  useConnect,
+  useDisconnect,
+  useReadContract,
+  useWriteContract,
+} from 'wagmi';
+import { injected } from 'wagmi/connectors';
+import { parseEther } from 'ethers';
+
+// ==============================
+// 🔹 CONFIG
+// ==============================
+
+// 👉 GANTI dengan contract address hasil deploy kamu day 2
+const CONTRACT_ADDRESS = 'address kmu';
+
+// 👉 ABI SIMPLE STORAGE
+const SIMPLE_STORAGE_ABI = [
+  {
+    inputs: [],
+    name: 'getValue',
+    outputs: [{ type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: '_value', type: 'uint256' }],
+    name: 'setValue',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+];
+
+export default function Page() {
+  // ==============================
+  // 🔹 WALLET STATE
+  // ==============================
+  const { address, isConnected } = useAccount();
+  const { connect, isPending: isConnecting } = useConnect();
+  const { disconnect } = useDisconnect();
+
+  // ==============================
+  // 🔹 LOCAL STATE
+  // ==============================
+  const [inputValue, setInputValue] = useState('');
+
+  // ==============================
+  // 🔹 READ CONTRACT
+  // ==============================
+  const {
+    data: value,
+    isLoading: isReading,
+    refetch,
+  } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: SIMPLE_STORAGE_ABI,
+    functionName: 'getValue',
+  });
+
+  // ==============================
+  // 🔹 WRITE CONTRACT
+  // ==============================
+  const {
+    writeContract,
+    isPending: isWriting,
+  } = useWriteContract();
+
+  const handleSetValue = async () => {
+    if (!inputValue) return;
+
+    writeContract({
+      address: CONTRACT_ADDRESS,
+      abi: SIMPLE_STORAGE_ABI,
+      functionName: 'setValue',
+      args: [BigInt(inputValue)],
+    });
+  };
+
+  // ==============================
+  // 🔹 UI
+  // ==============================
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="w-full max-w-md border border-gray-700 rounded-lg p-6 space-y-6">
+
+        <h1 className="text-xl font-bold">
+          Day 3 – Frontend dApp (Avalanche)
+        </h1>
+
+        {/* ==========================
+            WALLET CONNECT
+        ========================== */}
+        {!isConnected ? (
+          <button
+            onClick={() => connect({ connector: injected() })}
+            disabled={isConnecting}
+            className="w-full bg-white text-black py-2 rounded"
+          >
+            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+          </button>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-sm text-gray-400">Connected Address</p>
+            <p className="font-mono text-xs break-all">{address}</p>
+
+            <button
+              onClick={() => disconnect()}
+              className="text-red-400 text-sm underline"
+            >
+              Disconnect
+            </button>
+          </div>
+        )}
+
+        {/* ==========================
+            READ CONTRACT
+        ========================== */}
+        <div className="border-t border-gray-700 pt-4 space-y-2">
+          <p className="text-sm text-gray-400">Contract Value (read)</p>
+
+          {isReading ? (
+            <p>Loading...</p>
+          ) : (
+            <p className="text-2xl font-bold">{value?.toString()}</p>
+          )}
+
+          <button
+            onClick={() => refetch()}
+            className="text-sm underline text-gray-300"
+          >
+            Refresh value
+          </button>
+        </div>
+
+        {/* ==========================
+            WRITE CONTRACT
+        ========================== */}
+        <div className="border-t border-gray-700 pt-4 space-y-3">
+          <p className="text-sm text-gray-400">Update Contract Value</p>
+
+          <input
+            type="number"
+            placeholder="New value"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            className="w-full p-2 rounded bg-black border border-gray-600"
+          />
+
+          <button
+            onClick={handleSetValue}
+            disabled={isWriting}
+            className="w-full bg-blue-600 py-2 rounded"
+          >
+            {isWriting ? 'Updating...' : 'Set Value'}
+          </button>
+        </div>
+
+        {/* ==========================
+            FOOTNOTE
+        ========================== */}
+        <p className="text-xs text-gray-500 pt-2">
+          Smart contract = single source of truth
+        </p>
+
+      </div>
+    </main>
+  );
+}
+
+```
+
 ## 3.4 Task 4 – UX Improvement (Opsional)
 
 - Disable button saat tx pending
@@ -364,6 +655,8 @@ Handle kasus:
 - [ ] Read contract berhasil
 - [ ] Write contract berhasil
 - [ ] Tx muncul di explorer
+
+[Submission Link](https://forms.gle/ma5m2n8eG3eDnCjX6) aktif selama 48 jam, deadline tanggal 16 Januari 2026, pukul 23.59 WIB
 
 ---
 
@@ -403,6 +696,18 @@ Fokus Day 4:
 - Thirdweb: [https://thirdweb.com/](https://thirdweb.com/)
 - Next.js Docs: [https://nextjs.org/docs](https://nextjs.org/docs)
 - Avalanche Academy: [https://build.avax.network/academy](https://build.avax.network/academy)
+
+---
+
+## Post-Test
+
+[Link](https://forms.gle/dL7JuvX4HL5cwqtMA)
+
+---
+
+## Feedback
+
+[Link](https://forms.gle/mDWVh1NtDQkkwRpXA)
 
 ---
 
