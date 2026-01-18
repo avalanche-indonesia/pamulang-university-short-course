@@ -10,7 +10,7 @@ async function bootstrap() {
     .setTitle('Event Simple Storage DApp API')
     .setDescription('The Simple Storage dApp Web3 API documentation')
     .setVersion('1.0')
-    .addTag('Author : Eldrick Arsy Listyannika')
+    .addTag('Author : Eldrick Arsy Listyannika  251011401100')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
