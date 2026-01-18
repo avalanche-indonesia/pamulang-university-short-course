@@ -1,5 +1,13 @@
 # 📘 Day 5 – Integrasi & Deployment Full Stack dApp (Avalanche)
 
+---
+
+## Quiz Day 5
+
+[Link](https://forms.gle/AGrJTdxQCLCxjuUn7)
+
+---
+
 > Avalanche Indonesia Short Course – **Day 5**
 
 Hari kelima merupakan **puncak dari short course ini**.
@@ -176,18 +184,169 @@ CONTRACT_ADDRESS=0x...
 
 ## 2.1 Integrasi Frontend ↔ Backend
 
-Frontend akan:
+Frontend **tidak berinteraksi langsung dengan blockchain**, melainkan melalui **Backend API**.
 
-- Mengakses API backend:
+### 🔹 Endpoint Backend yang Digunakan
 
-  ```text
-  GET /blockchain/value
-  GET /blockchain/events
-  ```
-
-- Menampilkan data blockchain melalui backend
+```text
+GET /blockchain/value
+GET /blockchain/events
+```
 
 📌 Frontend **tidak perlu mengetahui RPC endpoint**
+📌 Semua logic blockchain berada di backend (NestJS)
+
+---
+
+### 1️⃣ Setup Environment Variable
+
+Buat file **`.env.local`** di root project frontend:
+
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:3000
+```
+
+> ⚠️ Gunakan `NEXT_PUBLIC_` agar bisa diakses di browser
+
+---
+
+### 2️⃣ Buat Service Fetch ke Backend
+
+Karena menggunakan **Next.js App Router**, buat folder:
+
+```text
+src/
+ └── services/
+     └── blockchain.service.ts
+```
+
+#### `blockchain.service.ts`
+
+```ts
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+if (!BACKEND_URL) {
+  throw new Error("NEXT_PUBLIC_BACKEND_URL is not defined");
+}
+
+/**
+ * Get latest blockchain value
+ */
+export async function getBlockchainValue() {
+  const res = await fetch(`${BACKEND_URL}/blockchain/value`, {
+    method: "GET",
+    cache: "no-store", // selalu ambil data terbaru
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch blockchain value");
+  }
+
+  return res.json();
+}
+
+/**
+ * Get blockchain events
+ */
+export async function getBlockchainEvents() {
+  const res = await fetch(`${BACKEND_URL}/blockchain/events`, {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch blockchain events");
+  }
+
+  return res.json();
+}
+```
+
+---
+
+### 3️⃣ Gunakan Service di Page (Server Component)
+
+Contoh penggunaan di **App Router page**:
+
+```text
+src/app/page.tsx
+```
+
+#### `page.tsx`
+
+```tsx
+import {
+  getBlockchainValue,
+  getBlockchainEvents,
+} from "@/services/blockchain.service";
+
+export default async function HomePage() {
+  const value = await getBlockchainValue();
+  const events = await getBlockchainEvents();
+
+  return (
+    <main className="p-6 space-y-4">
+      <h1 className="text-xl font-bold">Blockchain Data</h1>
+
+      <section>
+        <h2 className="font-semibold">Latest Value</h2>
+        <pre>{JSON.stringify(value, null, 2)}</pre>
+      </section>
+
+      <section>
+        <h2 className="font-semibold">Events</h2>
+        <pre>{JSON.stringify(events, null, 2)}</pre>
+      </section>
+    </main>
+  );
+}
+```
+
+📌 Karena ini **Server Component**, `fetch()` aman dan optimal
+📌 Tidak expose RPC / private logic ke client
+
+---
+
+### 4️⃣ (Opsional) Gunakan di Client Component
+
+Jika ingin dipakai di Client Component:
+
+```tsx
+"use client";
+
+import { useEffect, useState } from "react";
+import { getBlockchainValue } from "@/services/blockchain.service";
+
+export default function BlockchainValue() {
+  const [value, setValue] = useState<any>(null);
+
+  useEffect(() => {
+    getBlockchainValue().then(setValue).catch(console.error);
+  }, []);
+
+  return <pre>{JSON.stringify(value, null, 2)}</pre>;
+}
+```
+
+---
+
+### 5️⃣ Arsitektur Akhir
+
+```text
+[ Next.js Frontend ]
+        |
+        |  HTTP REST API
+        v
+[ NestJS Backend ]
+        |
+        |  viem
+        v
+[ Blockchain RPC ]
+```
+
+✔ Frontend clean
+✔ RPC & contract detail aman
+✔ Mudah ganti chain / provider
 
 ---
 
@@ -201,9 +360,13 @@ Frontend tetap bertanggung jawab untuk:
 
 📌 Backend **tidak terlibat dalam write**
 
+Ini masih sama dengan day 3
+
 ---
 
 ## 2.3 Deploy Smart Contract
+
+Boleh menggunakan smart contract yang sudah terdeploy di day 2 atau dapat deploy ulang seperti langkah di Day 2 menggunakan hardhat
 
 ```bash
 npx hardhat run scripts/deploy.ts --network fuji
@@ -218,26 +381,390 @@ Output:
 
 ## 2.4 Deploy Backend (NestJS)
 
+### 0️⃣ Prasyarat
+
+Pastikan kamu sudah punya:
+
+- ✅ Akun **GitHub**
+- ✅ Akun **Railway** → [https://railway.app](https://railway.app)
+- ✅ Project **sudah ada di GitHub repo**
+- ✅ Project **bisa dijalankan secara lokal**
+
+---
+
+### 1️⃣ Persiapkan Project di Lokal
+
+#### 1. Pastikan ada `package.json`
+
+Railway mendeteksi aplikasi dari sini.
+
+Contoh script **WAJIB**:
+
+```json
+{
+  "scripts": {
+    "start": "node dist/main.js",
+    "build": "npm run build"
+  }
+}
+```
+
+Untuk **NestJS**, biasanya:
+
+```json
+{
+  "scripts": {
+    "build": "nest build",
+    "start": "node dist/main.js",
+    "start:prod": "node dist/main.js"
+  }
+}
+```
+
+> Railway otomatis pakai `npm install` → `npm run build` → `npm start`
+
+---
+
+#### 2. Gunakan `process.env.PORT`
+
+🚨 **WAJIB** — Railway menentukan port sendiri.
+
+Contoh:
+
+```ts
+const port = process.env.PORT || 3000;
+app.listen(port);
+```
+
+❌ Jangan hardcode:
+
+```ts
+app.listen(3000);
+```
+
+---
+
+#### 3. Push ke GitHub
+
 ```bash
-npm run build
-npm run start:prod
+git add .
+git commit -m "ready for railway deploy"
+git push origin main
+```
+
+---
+
+### 2️⃣ Login Railway & Connect GitHub
+
+1. Buka 👉 [https://railway.app](https://railway.app)
+2. Klik **Login**
+3. Pilih **Continue with GitHub**
+4. Authorize Railway ke GitHub (sekali saja)
+
+---
+
+### 3️⃣ Create Project dari GitHub Repo
+
+1. Klik **New Project**
+2. Pilih **Deploy from GitHub repo**
+3. Pilih:
+
+   - **Repository**
+   - **Branch** (biasanya `main`)
+
+4. Klik **Deploy**
+
+⏳ Railway akan otomatis:
+
+- Clone repo
+- Install dependencies
+- Build project
+- Jalankan app
+
+---
+
+### 4️⃣ Setting Environment Variables (ENV)
+
+Jika aplikasi butuh `.env`:
+
+1. Masuk ke **Project**
+2. Klik **Variables**
+3. Tambahkan satu per satu:
+
+Contoh:
+
+```
+DATABASE_URL=postgres://...
+JWT_SECRET=supersecret
+RPC_URL=https://...
+```
+
+📌 **Jangan upload file `.env` ke GitHub**
+
+---
+
+### 5️⃣ (Opsional Jika Diperlukan Saja) Tambah Database
+
+Railway punya database built-in.
+
+#### Tambah PostgreSQL
+
+1. Klik **New**
+2. Pilih **Database → PostgreSQL**
+3. Railway otomatis generate:
+
+   - `DATABASE_URL`
+   - `PGHOST`, `PGUSER`, dll
+
+Gunakan di backend:
+
+```ts
+process.env.DATABASE_URL;
+```
+
+---
+
+### 6️⃣ Redeploy (Jika Perlu)
+
+Setiap:
+
+- `git push`
+- atau perubahan ENV
+
+Railway akan **auto redeploy** 🎉
+
+Manual redeploy:
+
+- Klik **Deployments**
+- Klik **Redeploy**
+
+---
+
+### 7️⃣ Akses URL Production
+
+1. Masuk ke **Settings**
+2. Buka **Domains**
+3. Gunakan:
+
+   ```
+   https://<project-name>.up.railway.app
+   ```
+
+Atau custom domain jika mau.
+
+---
+
+### 8️⃣ Cek Logs (PENTING)
+
+Kalau error:
+
+1. Buka **Deployments**
+2. Klik deployment terbaru
+3. Lihat **Logs**
+
+Biasanya error:
+
+- `PORT not defined`
+- `Cannot find module dist/main.js`
+- ENV belum diset
+
+---
+
+### 9️⃣ Struktur Ideal Project (Backend)
+
+```
+project/
+├─ src/
+├─ dist/
+├─ package.json
+├─ tsconfig.json
+├─ .gitignore
 ```
 
 Pastikan:
 
-- API dapat diakses publik
+- `dist/` dihasilkan oleh build
+- `start` pakai file di `dist`
+
+---
+
+### 1️⃣0️⃣ Checklist Cepat (Anti Gagal)
+
+✅ `process.env.PORT`
+✅ `npm start` jalan
+✅ `npm run build` jalan
+✅ ENV di Railway sudah diisi
+✅ Repo public / authorized
+
+---
+
+### 🔐 Catatan Penting
+
+- API dapat diakses publik (railway akan generate link backend cek di step 7 dan masukan ini ke form submission)
 - RPC & contract address benar
 
 ---
 
 ## 2.5 Deploy Frontend
 
+### 🧩 Prasyarat
+
+Sebelum mulai, pastikan kamu sudah punya:
+
+- ✅ Akun **GitHub**
+- ✅ Project **Next.js** sudah jalan di lokal
+- ✅ Source code **sudah di-push ke GitHub**
+- ✅ Backend sudah live (contoh: **Railway**)
+- ✅ URL backend, misalnya:
+
+  ```
+  https://your-backend-production.up.railway.app
+  ```
+
+---
+
+### 1️⃣ Push Project Next.js ke GitHub
+
+Jika belum:
+
 ```bash
-npm run build
-npm run start
+git init
+git add .
+git commit -m "initial commit"
+git branch -M main
+git remote add origin https://github.com/username/nama-repo.git
+git push -u origin main
 ```
 
-Atau deploy ke platform frontend hosting.
+Pastikan repo **public** atau **private (boleh)**.
+
+---
+
+### 2️⃣ Daftar / Login ke Vercel
+
+1. Buka 👉 [https://vercel.com](https://vercel.com)
+2. Klik **Sign Up** atau **Log In**
+3. Pilih **Continue with GitHub**
+4. Authorize Vercel untuk mengakses GitHub kamu
+
+✅ Setelah ini kamu masuk ke **Vercel Dashboard**
+
+---
+
+### 3️⃣ Import Project dari GitHub
+
+1. Di Dashboard Vercel, klik **Add New → Project**
+2. Pilih repository Next.js kamu
+3. Klik **Import**
+
+Vercel akan otomatis mendeteksi:
+
+- Framework: **Next.js**
+- Build command & output → **auto**
+
+---
+
+### 4️⃣ Setup Environment Variable (Backend URL)
+
+Ini langkah **PENTING** 🔥
+
+#### 📌 Penamaan ENV (Best Practice)
+
+Karena Next.js frontend butuh akses dari browser:
+
+```env
+NEXT_PUBLIC_BACKEND_URL=https://your-backend-production.up.railway.app
+```
+
+> ⚠️ **WAJIB `NEXT_PUBLIC_`** agar bisa diakses di client-side
+
+---
+
+#### Cara Menambahkan ENV di Vercel
+
+1. Di halaman **Configure Project**
+2. Scroll ke **Environment Variables**
+3. Isi:
+
+   - **Key**: `NEXT_PUBLIC_BACKEND_URL`
+   - **Value**: `https://your-backend-production.up.railway.app`
+   - **Environment**: `Production` (boleh centang Preview juga)
+
+4. Klik **Add**
+
+---
+
+### 5️⃣ Pastikan Kode Frontend Pakai ENV
+
+Contoh pemakaian di Next.js:
+
+```ts
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+const res = await fetch(`${BACKEND_URL}/api/health`);
+```
+
+📌 Jangan hardcode URL backend di source code!
+
+---
+
+### 6️⃣ Deploy ke Vercel 🚀
+
+1. Klik **Deploy**
+2. Tunggu proses:
+
+   - Install dependencies
+   - Build Next.js
+   - Upload ke edge/CDN
+
+⏱️ Biasanya 1–2 menit
+
+---
+
+### 7️⃣ Akses URL Production
+
+Setelah sukses, kamu dapat:
+
+```
+https://nama-project.vercel.app
+```
+
+Coba:
+
+- Buka website
+- Test request ke backend
+- Cek console browser (tidak ada error CORS / ENV)
+
+---
+
+### 8️⃣ Auto Deploy (Bonus 🎉)
+
+Setelah setup:
+
+- ✅ Setiap `git push` ke `main`
+- ✅ Vercel otomatis **rebuild & redeploy**
+- ❌ Tidak perlu deploy manual lagi
+
+---
+
+### 9️⃣ Update ENV Setelah Deploy (Jika Perlu)
+
+Kalau backend URL berubah:
+
+1. Project → **Settings**
+2. **Environment Variables**
+3. Edit value
+4. Klik **Save**
+5. **Redeploy** (important!)
+
+---
+
+### 🔐 Catatan Penting
+
+- ❌ Jangan taruh API key rahasia di `NEXT_PUBLIC_*`
+- ✅ Gunakan `NEXT_PUBLIC_` hanya untuk data yang aman di frontend
+- 🔁 Backend private key tetap di **Railway / backend server**
+- Aplikasi dapat diakses publik (vercel akan generate link backend cek di step 7 dan masukan ini ke form submission)
 
 ---
 
@@ -310,6 +837,8 @@ Menyelesaikan **integrasi & deployment full stack dApp**.
 - [ ] Read & write blockchain sukses
 - [ ] Full flow berjalan end-to-end
 
+[Submission Link](https://forms.gle/1MxgvJkQkzB5qmsAA) aktif selama 72 jam, deadline Senin, 19 Januari 2026, pukul 23.59 WIB
+
 ---
 
 ## ✅ Output Akhir Short Course
@@ -355,6 +884,12 @@ Kamu telah menyelesaikan:
 - viem – [https://viem.sh](https://viem.sh)
 - NestJS – [https://docs.nestjs.com](https://docs.nestjs.com)
 - Core Wallet – [https://core.app](https://core.app)
+
+---
+
+## Feedback
+
+[Link](https://forms.gle/gLEivpAMX1z9tsPq8)
 
 ---
 
