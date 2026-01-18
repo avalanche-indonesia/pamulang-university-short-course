@@ -1,0 +1,95 @@
+
+
+ 
+* {
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+  
+}
+
+body {
+  
+  margin: 0;
+  background: linear-gradient(135deg, #4093b6, #203a43, #4093b6);
+  color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+ 
+
+  background-image: url("brown watch tower.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.container {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+h1 {
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  margin-top: 0;
+  opacity: 0.8;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin: 16px 0;
+  border: none;
+  border-radius: 8px;
+  background-color: #ea1212;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #602121;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  border-radius: 14px;
+  font-size: 14px;
+  text-align: left;
+  z-index: 0;
+  background: rgba(255, 255, 255, 0.06); /* light translucent layer */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(2, 8, 12, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.card::before {
+  /* fallback layer for browsers without backdrop-filter */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.02);
+  filter: blur(18px);
+  transform: scale(1.03);
+  z-index: -1;
+}
+.card > * { position: relative; z-index: 1; }
+
+#address {
+  font-family: monospace;
+  font-size: 13px;
+  word-break: break-all;
+}

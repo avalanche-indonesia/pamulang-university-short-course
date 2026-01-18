@@ -1,0 +1,2 @@
+export const SIMPLE_STORAGE_ABI=
+"0xaa60ffee82a62c8175b47975331800c181a04aaf";
