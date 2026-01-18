@@ -26,7 +26,7 @@ export class BlockchainService {
     this.contractAddress =
       '0xFdfEf3f3291648fc3D89Cf3f1556AA1e537f103e' as `0x${string}`;
   }
-
+  
   // Read latest value
   async getLatestValue() {
     try {
