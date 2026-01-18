@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { writeFileSync } from 'fs'; // ⬅️ TAMBAH INI
+import { writeFileSync } from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,7 +15,7 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
 
-  // ⬇️ NARUH DI SINI (INI PENTING)
+  // 🔥 PENTING: generate swagger.json
   writeFileSync('./swagger.json', JSON.stringify(document, null, 2));
 
   SwaggerModule.setup('myswagger', app, document);
@@ -26,7 +26,4 @@ async function bootstrap() {
   console.log(`🚀 Server running on port ${port}`);
 }
 
-bootstrap().catch((error) => {
-  console.error('Error during application bootstrap:', error);
-  process.exit(1);
-});
+bootstrap();
