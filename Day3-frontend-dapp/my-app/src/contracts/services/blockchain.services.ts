@@ -26,7 +26,7 @@ export async function getBlockchainValue() {
       //       "Content-Type": "application/json",
       //     },
       //     body: JSON.stringify({
-      //       fromBlock: "50602548",
+      //       fromBlock: "50641811",
       //       limitBlock: 10,
       //     }),
       //   });
