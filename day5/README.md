@@ -1,4 +1,6 @@
 ## INI DEPLOY DAY 5
+NAma saya Eldrick Arsy Listyanika 
+menyelesaikan Short Course Full Stack dApps Bersama Avalanche Indonesia selama 5 hari 
 
 ## Backend Deployment Status
 Karena railway harus menggunakan kartu/berbayar saya mencoba menggunakan Github Pages jadi belom bisa menjalankan backend Nestjs secara server/menggunakan hosting railway karena GitHub Pages hanya static hosting.
