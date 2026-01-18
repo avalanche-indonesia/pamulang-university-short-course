@@ -549,7 +549,7 @@ Tambahkan 1 state lainnya seperti `message` atau `todo list` yang bisa diupdate 
 - [ ] ABI tersedia
 - [ ] Event terlihat di explorer
 
-[Submission Link](https://forms.gle/bDjmXjqaK3X7yapc8) aktif selama 48 jam
+[Submission Link](https://forms.gle/bDjmXjqaK3X7yapc8) aktif selama 48 jam, deadline Tanggal 15 Jan 2026 pukul 23.59 WIB
 
 ---
 
