@@ -1,0 +1,92 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/blockchain/value": {
+      "get": {
+        "operationId": "BlockchainController_getValue",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get latest stored value",
+        "tags": [
+          "blockchain"
+        ]
+      }
+    },
+    "/blockchain/events": {
+      "post": {
+        "description": "❗❗Click \"Try it out\" to input fromBlock and limitBlock❗❗",
+        "operationId": "BlockchainController_getEvents",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetEventsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Get ValueUpdated events with cursor-based pagination",
+        "tags": [
+          "blockchain"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Event Simple Storage DApp API",
+    "description": "The Simple Storage dApp Web3 API documentation",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "Author : Eldrick Arsy Listyannika 251011401100",
+      "description": ""
+    }
+  ],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "GetEventsDto": {
+        "type": "object",
+        "properties": {
+          "fromBlock": {
+            "type": "string",
+            "description": "Cursor block to start scanning from",
+            "example": "ambil block yang ada pada event snowtrace contohnya harus pakai kutip dua 50641811 "
+          },
+          "limitBlock": {
+            "type": "number",
+            "description": "Maximum block range per request",
+            "example": "pilih nilai antara 1 --> 2000 jangan pakai kutip dua"
+          }
+        }
+      }
+    }
+  }
+}
