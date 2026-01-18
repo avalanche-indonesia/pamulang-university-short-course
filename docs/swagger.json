@@ -58,18 +58,31 @@
     }
   },
   "info": {
-    "title": "Event Simple Storage DApp API",
-    "description": "The Simple Storage dApp Web3 API documentation",
-    "version": "1.0",
-    "contact": {}
+    "info": {
+  "title": "Event Simple Storage DApp API",
+  "description": "The Simple Storage dApp Web3 API documentation",
+  "version": "1.0",
+  "contact": {
+    "name": "Eldrick Arsy Listyannika",
+    "email": "eldrickarsy@gmail.com"
+  }
+}
   },
   "tags": [
     {
-      "name": "Author : Eldrick Arsy Listyannika 251011401100",
-      "description": ""
-    }
+    "name": "Author : Eldrick Arsy Listyannika 251011401100",
+    "description": ""
+  }
   ],
-  "servers": [],
+  "servers": [{
+    "url": "http://localhost:3000",
+    "description": "Local development server"
+  },
+  {
+    "url": "https://linka-hub.github.io/pamulang-university-short-course",
+    "description": "Static Swagger Documentation (GitHub Pages)"
+  }],
+
   "components": {
     "schemas": {
       "GetEventsDto": {
